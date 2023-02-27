@@ -109,7 +109,7 @@ public class JDBCUtils {
       if (queryTimeoutValue != 0) {
         tmpStmt.setQueryTimeout(queryTimeoutValue);
       }
-      tmpStmt.executeQuery(query);
+      tmpStmt.execute(query);
     } catch (Throwable e) {
       throw e;
     }
