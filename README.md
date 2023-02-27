@@ -42,7 +42,8 @@ drivername '[JDBC drivername]',
 url '[JDBC url]',
 querytimeout '[querytimeout]',
 jarfile '[the path of jarfile]',
-maxheapsize '[maxheapsize]'
+maxheapsize '[maxheapsize]',
+init_sql '[connection initialization command]'
 );
 ```
 #### [JDBC drivername]
@@ -84,6 +85,9 @@ Note that the path must be absolute path.
 #### [maxheapsize]
 The value of the option shall be set to the maximum heap size of the JVM which is being used in jdbc fdw. It can be set from 1 Mb onwards.  
 This option is used for setting the maximum heap size of the JVM manually.
+
+#### [init_sql]
+A SQL command issued to the server after successfully establishing a new connection. Useful for setting session parameters.
 
 ### 5. Create a user mapping for the server.
 ```

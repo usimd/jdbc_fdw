@@ -75,6 +75,7 @@ typedef struct JserverOptions
 	int			querytimeout;
 	char	   *jarfile;
 	int			maxheapsize;
+	char       *init_sql;
 }			JserverOptions;
 
 static JserverOptions opts;
@@ -542,6 +543,10 @@ jdbc_get_server_options(JserverOptions * opts, const ForeignServer * f_server, c
 		if (strcmp(def->defname, "url") == 0)
 		{
 			opts->url = defGetString(def);
+		}
+		if (strcmp(def->defname, "init_sql") == 0)
+		{
+			opts->init_sql = defGetString(def);
 		}
 	}
 }

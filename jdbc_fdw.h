@@ -132,6 +132,7 @@ extern void jdbc_fdw_report_error(int elevel, Jresult * res, Jconn * conn,
 extern int	jdbc_extract_connection_options(List *defelems,
 											const char **keywords,
 											const char **values);
+extern char * jdbc_get_init_sql(ForeignServer *server);
 
 /* in deparse.c */
 extern void jdbc_classify_conditions(PlannerInfo *root,

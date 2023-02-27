@@ -163,6 +163,7 @@ init_jdbcfdw_options(void)
 		{"maxheapsize", ForeignServerRelationId, false},
 		{"username", UserMappingRelationId, false},
 		{"password", UserMappingRelationId, false},
+		{"init_sql", ForeignServerRelationId, false},
 		/* use_remote_estimate is available on both server and table */
 		{"use_remote_estimate", ForeignServerRelationId, false},
 		{"use_remote_estimate", ForeignTableRelationId, false},
@@ -317,4 +318,24 @@ jdbc_extract_connection_options(List *defelems, const char **keywords,
 		}
 	}
 	return i;
+}
+
+char *
+jdbc_get_init_sql(ForeignServer *server)
+{
+	ListCell   *lc;
+
+	if (server->options != NULL) {
+		foreach(lc, server->options)
+		{
+			DefElem    *d = (DefElem *) lfirst(lc);
+
+			if (strcmp(d->defname, "init_sql") == 0)
+			{
+				return defGetString(d);
+			}
+		}
+	}
+
+	return NULL;
 }
