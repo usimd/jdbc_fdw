@@ -197,6 +197,7 @@ connect_jdbc_server(ForeignServer *server, UserMapping *user)
 	{
 		const char **keywords;
 		const char **values;
+		const char *init_sql;
 		int			n;
 
 		/*
@@ -232,6 +233,8 @@ connect_jdbc_server(ForeignServer *server, UserMapping *user)
 		/* verify connection parameters and make connection */
 		jdbc_check_conn_params(keywords, values);
 
+		init_sql = jdbc_get_init_sql(server);
+
 		conn = jq_connect_db_params(server, user, keywords, values);
 		if (!conn || jq_status(conn) != CONNECTION_OK)
 		{
@@ -248,6 +251,9 @@ connect_jdbc_server(ForeignServer *server, UserMapping *user)
 					 errmsg("could not connect to server \"%s\"",
 							server->servername),
 					 errdetail_internal("%s", connmessage)));
+		} else if (init_sql != NULL) {
+			ereport(DEBUG3, (errmsg("Initializig new connection with init_sql: '%s'", init_sql)));
+			jdbc_do_sql_command(conn, init_sql);
 		}
 
 		/*
