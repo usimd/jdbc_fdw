@@ -105,14 +105,13 @@ public class JDBCUtils {
      */
     try {
       checkConnExist();
-      tmpStmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-      if (queryTimeoutValue != 0) {
-        tmpStmt.setQueryTimeout(queryTimeoutValue);
-      }
       for (String queryPart : query.split(";")) {
-        tmpStmt.addBatch(queryPart);
+        tmpStmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+        if (queryTimeoutValue != 0) {
+          tmpStmt.setQueryTimeout(queryTimeoutValue);
+        }
+        tmpStmt.execute(queryPart);
       }
-      tmpStmt.executeBatch();
     } catch (Throwable e) {
       throw e;
     }
