@@ -236,6 +236,7 @@ typedef struct ConversionLocation
 PG_FUNCTION_INFO_V1(jdbc_fdw_handler);
 PG_FUNCTION_INFO_V1(jdbc_fdw_version);
 PG_FUNCTION_INFO_V1(jdbc_exec);
+PG_FUNCTION_INFO_V1(jdbc_exec_ddl);
 /*
  * FDW callback routines
  */
@@ -471,6 +472,63 @@ jdbc_exec(PG_FUNCTION_ARGS)
 	PG_END_TRY();
 
 	return (Datum) 0;
+}
+
+
+Datum
+jdbc_exec_ddl(PG_FUNCTION_ARGS)
+{
+	Jconn	*conn		= NULL;
+	char	*servername	= NULL;
+	char	*sql		= NULL;
+
+	Jresult *volatile res	= NULL;
+
+	PG_TRY();
+	{
+		if (PG_NARGS() == 2)
+		{
+			servername = text_to_cstring(PG_GETARG_TEXT_PP(0));
+			sql = text_to_cstring(PG_GETARG_TEXT_PP(1));
+			conn = jdbc_get_conn_by_server_name(servername);
+		}
+		else
+		{
+			/* shouldn't happen */
+			elog(ERROR, "jdbc_fdw: wrong number of arguments");
+		}
+
+		if (!conn)
+		{
+			ereport(ERROR,
+					(errcode(ERRCODE_CONNECTION_DOES_NOT_EXIST),
+					 errmsg("jdbc_fdw: server \"%s\" not available", servername)));
+		}
+
+		/* Execute sql query */
+		res = jq_exec(conn, sql);
+
+		if (*res != PGRES_COMMAND_OK) {
+			jdbc_fdw_report_error(ERROR, res, conn, false, sql);
+			PG_RETURN_BOOL(false);
+		}
+
+		PG_RETURN_BOOL(true);
+	}
+	PG_FINALLY();
+	{
+		if (res)
+			jq_clear(res);
+
+		if (conn)
+		{
+			jdbc_release_connection(conn);
+			conn = NULL;
+		}
+	}
+	PG_END_TRY();
+
+	PG_RETURN_BOOL(false);
 }
 
 /*
